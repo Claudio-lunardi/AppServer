@@ -16,5 +16,6 @@ namespace AppServer.Controllers
             _contador++;
             return Ok(new { contador = _contador });
         }
+        //teste 1
     }
 }
