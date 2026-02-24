@@ -2,7 +2,7 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   docker:
@@ -16,13 +16,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set image name (lowercase)
+      # --- nomes em lowercase (GHCR exige) ---
+      - name: Set image names (lowercase)
         id: vars
         run: |
           OWNER_LC=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
           REPO_LC=$(echo "${GITHUB_REPOSITORY#*/}" | tr '[:upper:]' '[:lower:]')
-          echo "image=ghcr.io/${OWNER_LC}/${REPO_LC}" >> $GITHUB_OUTPUT
+          echo "ghcr=ghcr.io/${OWNER_LC}/${REPO_LC}" >> $GITHUB_OUTPUT
+          echo "dockerhub=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${REPO_LC}" >> $GITHUB_OUTPUT
 
+      # --- Login GHCR ---
       - name: Login no GHCR
         uses: docker/login-action@v3
         with:
@@ -30,10 +33,20 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # --- Login Docker Hub ---
+      - name: Login no Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # --- Build e Push para os DOIS registries ---
       - name: Build e Push
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.vars.outputs.image }}:latest
+          tags: |
+            ${{ steps.vars.outputs.ghcr }}:latest
+            ${{ steps.vars.outputs.dockerhub }}:latest
