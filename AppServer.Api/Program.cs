@@ -1,7 +1,5 @@
 using AppServer.Infrastructure;
 using AppServer.Shared.Config;
-using Microsoft.Extensions.DependencyInjection;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,9 +32,7 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = "swagger";
     });
 }
-
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
 
 app.MapControllers();
