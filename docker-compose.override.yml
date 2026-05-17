@@ -14,9 +14,7 @@ services:
       - RabbitMq__Password=guest
     ports:
       - "8080:8080"
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+
   appserver.worker:
     environment:
       - DOTNET_ENVIRONMENT=Development
@@ -24,6 +22,8 @@ services:
       - RabbitMq__Port=5672
       - RabbitMq__UserName=guest
       - RabbitMq__Password=guest
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - Email__Host=smtp.gmail.com
+      - Email__Port=587
+      - Email__Username=claudioappserve@gmail.com
+      - Email__Password=vnzdmkomnzudrbwc
+      - Email__From=claudioappserve@gmail.com
