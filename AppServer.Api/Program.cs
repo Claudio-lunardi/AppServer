@@ -1,3 +1,4 @@
+using AppServer.Application;
 using AppServer.Infrastructure;
 using AppServer.Shared.Config;
 using Microsoft.OpenApi;
@@ -9,7 +10,8 @@ builder.Services.AddControllers();
 builder.Services.Configure<RabbitMqConfig>(builder.Configuration.GetSection("RabbitMq"));
 builder.Services.Configure<EmailConfig>(builder.Configuration.GetSection("Email"));
 
-builder.Services.AddInfrastructure();
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure("appserver-api-publisher");
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -35,6 +37,7 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 
+app.MapGet("/", () => Results.Redirect("/swagger"));
 app.MapControllers();
 
 app.Run();

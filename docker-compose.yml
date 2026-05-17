@@ -1,0 +1,20 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+
+  appserver.api:
+    image: ${DOCKER_REGISTRY-}appserverapi
+    build:
+      context: .
+      dockerfile: AppServer.Api/Dockerfile
+    depends_on:
+      - rabbitmq
+
+  appserver.worker:
+    image: ${DOCKER_REGISTRY-}appserverworker
+    build:
+      context: .
+      dockerfile: AppServer.Worker/Dockerfile
+    depends_on:
+      - rabbitmq
+

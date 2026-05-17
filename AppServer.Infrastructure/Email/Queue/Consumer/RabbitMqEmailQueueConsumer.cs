@@ -1,29 +1,30 @@
-using AppServer.Application.Interfaces;
-using AppServer.Infrastructure.RabbitMq;
+using AppServer.Application.Email.ProcessQueuedEmail;
 using AppServer.Shared.Models;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
 
-namespace AppServer.Infrastructure.RabbitMq;
+using AppServer.Infrastructure.RabbitMq;
 
-public class RabbitMqConsumer : IRabbitMqConsumer
+namespace AppServer.Infrastructure.Email.Queue.Consumer;
+
+public class RabbitMqEmailQueueConsumer : IEmailQueueConsumer
 {
-    private readonly ILogger<RabbitMqConsumer> _logger;
+    private readonly ILogger<RabbitMqEmailQueueConsumer> _logger;
     private readonly RabbitMQFactory _factory;
 
-    public RabbitMqConsumer(ILogger<RabbitMqConsumer> logger, RabbitMQFactory factory)
+    public RabbitMqEmailQueueConsumer(ILogger<RabbitMqEmailQueueConsumer> logger, RabbitMQFactory factory)
     {
         _logger = logger;
         _factory = factory;
     }
 
-    public async Task StartAsync(Func<EmailMessageModel, Task> handler, CancellationToken cancellationToken)
+    public async Task StartAsync(Func<EmailMessageModel, CancellationToken, Task> handler, CancellationToken cancellationToken)
     {
         try
         {
-            var channel = await _factory.GetChannelAsync();
+            await using var channel = await _factory.CreateChannelAsync();
 
             await channel.QueueDeclareAsync(
                 queue: "email-queue",
@@ -34,7 +35,7 @@ public class RabbitMqConsumer : IRabbitMqConsumer
 
             var consumer = new AsyncEventingBasicConsumer(channel);
 
-            consumer.ReceivedAsync += async (model, ea) =>
+            consumer.ReceivedAsync += async (_, ea) =>
             {
                 try
                 {
@@ -44,7 +45,7 @@ public class RabbitMqConsumer : IRabbitMqConsumer
 
                     if (message != null)
                     {
-                        await handler(message);
+                        await handler(message, cancellationToken);
                         await channel.BasicAckAsync(ea.DeliveryTag, false);
                     }
                 }

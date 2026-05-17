@@ -6,10 +6,9 @@ namespace AppServer.Infrastructure.RabbitMq;
 
 public class RabbitMQFactory : IAsyncDisposable
 {
-    private IChannel? _channel;
     private readonly IConnection _connection;
 
-    public RabbitMQFactory(IOptions<RabbitMqConfig> options)
+    public RabbitMQFactory(IOptions<RabbitMqConfig> options, RabbitMqConnectionIdentity connectionIdentity)
     {
         var config = options.Value;
         var factory = new ConnectionFactory
@@ -20,27 +19,13 @@ public class RabbitMQFactory : IAsyncDisposable
             Password = config.Password,
         };
 
-        _connection = factory.CreateConnectionAsync().GetAwaiter().GetResult();
+        _connection = factory
+            .CreateConnectionAsync(connectionIdentity.ClientProvidedName, CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
     }
 
-    public async Task<IChannel> GetChannelAsync()
-    {
-        if (_channel == null || !_channel.IsOpen)
-        {
-            if (_channel != null)
-                await _channel.DisposeAsync();
+    public Task<IChannel> CreateChannelAsync() => _connection.CreateChannelAsync();
 
-            _channel = await _connection.CreateChannelAsync();
-        }
-
-        return _channel;
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_channel != null)
-            await _channel.DisposeAsync();
-
-        await _connection.DisposeAsync();
-    }
+    public async ValueTask DisposeAsync() => await _connection.DisposeAsync();
 }

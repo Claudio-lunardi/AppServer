@@ -1,4 +1,4 @@
-using AppServer.Application.Interfaces;
+using AppServer.Application.Email.SendEmail;
 using AppServer.Shared.Config;
 using MailKit.Net.Smtp;
 using MailKit.Security;
@@ -6,14 +6,14 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
 
-namespace AppServer.Infrastructure.Email;
+namespace AppServer.Infrastructure.Email.Sending;
 
-public class EmailSender : IEmailSender
+public class SmtpEmailSender : IEmailSender
 {
-    private readonly ILogger<EmailSender> _logger;
+    private readonly ILogger<SmtpEmailSender> _logger;
     private readonly EmailConfig _config;
 
-    public EmailSender(ILogger<EmailSender> logger, IOptions<EmailConfig> options)
+    public SmtpEmailSender(ILogger<SmtpEmailSender> logger, IOptions<EmailConfig> options)
     {
         _logger = logger;
         _config = options.Value;

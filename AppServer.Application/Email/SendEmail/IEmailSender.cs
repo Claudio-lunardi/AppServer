@@ -1,4 +1,4 @@
-namespace AppServer.Application.Interfaces;
+namespace AppServer.Application.Email.SendEmail;
 
 public interface IEmailSender
 {

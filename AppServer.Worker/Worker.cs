@@ -1,4 +1,4 @@
-using AppServer.Application.Interfaces;
+using AppServer.Application.Email.ProcessQueuedEmail;
 using AppServer.Shared.Models;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -7,22 +7,24 @@ namespace AppServer.Worker;
 public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IRabbitMqConsumer _rabbitMqConsumer;
+    private readonly IEmailQueueConsumer _emailQueueConsumer;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public Worker(ILogger<Worker> logger, IServiceScopeFactory scopeFactory, IRabbitMqConsumer rabbitMqConsumer)
+    public Worker(
+        ILogger<Worker> logger,
+        IEmailQueueConsumer emailQueueConsumer,
+        IServiceScopeFactory serviceScopeFactory)
     {
         _logger = logger;
-        _scopeFactory = scopeFactory;
-        _rabbitMqConsumer = rabbitMqConsumer;
+        _emailQueueConsumer = emailQueueConsumer;
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
-            // Inicia consumo da fila
-            await _rabbitMqConsumer.StartAsync(handler: ProcessarMensagemAsync, cancellationToken: stoppingToken);
+            await _emailQueueConsumer.StartAsync(ProcessarMensagemAsync, stoppingToken);
         }
         catch (Exception ex)
         {
@@ -30,16 +32,16 @@ public class Worker : BackgroundService
         }
     }
 
-    private async Task ProcessarMensagemAsync(EmailMessageModel message)
+    private Task ProcessarMensagemAsync(EmailMessageModel message, CancellationToken cancellationToken)
     {
-        await using var scope = _scopeFactory.CreateAsyncScope();
-        var emailSender = scope.ServiceProvider.GetRequiredService<IEmailSender>();
+        return ProcessarMensagemEmEscopoAsync(message, cancellationToken);
+    }
 
-        await emailSender.SendAsync(
-            to: message.To,
-            subject: message.Subject,
-            body: message.Body,
-            isHtml: message.IsHtml
-        );
+    private async Task ProcessarMensagemEmEscopoAsync(EmailMessageModel message, CancellationToken cancellationToken)
+    {
+        await using var scope = _serviceScopeFactory.CreateAsyncScope();
+        var processQueuedEmailUseCase = scope.ServiceProvider.GetRequiredService<IProcessQueuedEmailUseCase>();
+
+        await processQueuedEmailUseCase.ProcessAsync(message, cancellationToken);
     }
 }
