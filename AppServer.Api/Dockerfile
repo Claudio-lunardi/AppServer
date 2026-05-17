@@ -13,6 +13,9 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["AppServer.Api/AppServer.Api.csproj", "AppServer.Api/"]
+COPY ["AppServer.Application/AppServer.Application.csproj", "AppServer.Application/"]
+COPY ["AppServer.Shared/AppServer.Shared.csproj", "AppServer.Shared/"]
+COPY ["AppServer.Infrastructure/AppServer.Infrastructure.csproj", "AppServer.Infrastructure/"]
 RUN dotnet restore "./AppServer.Api/AppServer.Api.csproj"
 COPY . .
 WORKDIR "/src/AppServer.Api"
