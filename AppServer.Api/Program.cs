@@ -8,7 +8,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.Configure<RabbitMqConfig>(builder.Configuration.GetSection("RabbitMq"));
-builder.Services.Configure<EmailConfig>(builder.Configuration.GetSection("Email"));
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure("appserver-api-publisher");

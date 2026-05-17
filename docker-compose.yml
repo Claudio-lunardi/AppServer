@@ -1,20 +1,31 @@
 services:
   rabbitmq:
     image: rabbitmq:3-management
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   appserver.api:
     image: ${DOCKER_REGISTRY-}appserverapi
+    restart: unless-stopped
     build:
       context: .
       dockerfile: AppServer.Api/Dockerfile
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
 
   appserver.worker:
     image: ${DOCKER_REGISTRY-}appserverworker
+    restart: unless-stopped
     build:
       context: .
       dockerfile: AppServer.Worker/Dockerfile
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
 

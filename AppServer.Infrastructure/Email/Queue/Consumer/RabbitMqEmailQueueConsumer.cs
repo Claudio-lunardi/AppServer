@@ -22,59 +22,66 @@ public class RabbitMqEmailQueueConsumer : IEmailQueueConsumer
 
     public async Task StartAsync(Func<EmailMessageModel, CancellationToken, Task> handler, CancellationToken cancellationToken)
     {
-        try
+        while (!cancellationToken.IsCancellationRequested)
         {
-            await using var channel = await _factory.CreateChannelAsync();
-
-            await channel.QueueDeclareAsync(
-                queue: "email-queue",
-                durable: true,
-                exclusive: false,
-                autoDelete: false
-            );
-
-            var consumer = new AsyncEventingBasicConsumer(channel);
-
-            consumer.ReceivedAsync += async (_, ea) =>
+            try
             {
-                try
-                {
-                    var body = ea.Body.ToArray();
-                    var json = Encoding.UTF8.GetString(body);
-                    var message = JsonSerializer.Deserialize<EmailMessageModel>(json);
+                await using var channel = await _factory.CreateChannelAsync(cancellationToken);
 
-                    if (message != null)
+                await channel.QueueDeclareAsync(
+                    queue: "email-queue",
+                    durable: true,
+                    exclusive: false,
+                    autoDelete: false
+                );
+
+                var consumer = new AsyncEventingBasicConsumer(channel);
+
+                consumer.ReceivedAsync += async (_, ea) =>
+                {
+                    try
                     {
-                        await handler(message, cancellationToken);
-                        await channel.BasicAckAsync(ea.DeliveryTag, false);
+                        var body = ea.Body.ToArray();
+                        var json = Encoding.UTF8.GetString(body);
+                        var message = JsonSerializer.Deserialize<EmailMessageModel>(json);
+
+                        if (message != null)
+                        {
+                            await handler(message, cancellationToken);
+                            await channel.BasicAckAsync(ea.DeliveryTag, false);
+                        }
                     }
-                }
-                catch (Exception ex)
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Erro ao processar mensagem");
+                        await channel.BasicNackAsync(ea.DeliveryTag, false, true);
+                    }
+                };
+
+                await channel.BasicConsumeAsync(
+                    queue: "email-queue",
+                    autoAck: false,
+                    consumerTag: string.Empty,
+                    noLocal: false,
+                    exclusive: false,
+                    arguments: null,
+                    consumer: consumer
+                );
+
+                while (!cancellationToken.IsCancellationRequested)
                 {
-                    _logger.LogError(ex, "Erro ao processar mensagem");
-                    await channel.BasicNackAsync(ea.DeliveryTag, false, true);
+                    await Task.Delay(1000, cancellationToken);
                 }
-            };
-
-            await channel.BasicConsumeAsync(
-                queue: "email-queue",
-                autoAck: false,
-                consumerTag: string.Empty,
-                noLocal: false,
-                exclusive: false,
-                arguments: null,
-                consumer: consumer
-            );
-
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                await Task.Delay(1000, cancellationToken);
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erro no consumidor RabbitMQ");
-            throw;
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Falha ao conectar/consumir RabbitMQ. Nova tentativa em 5 segundos.");
+                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+            }
         }
     }
 }
