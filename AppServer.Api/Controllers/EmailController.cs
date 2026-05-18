@@ -23,6 +23,7 @@ public class EmailController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
+
         try
         {
             await _queueEmailUseCase.QueueAsync(request, HttpContext.RequestAborted);
