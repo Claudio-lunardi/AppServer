@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appserver-worker
+  namespace: appserver
+spec:
+  replicas: 35
+  selector:
+    matchLabels:
+      app: appserver-worker
+  template:
+    metadata:
+      labels:
+        app: appserver-worker
+    spec:
+      containers:
+        - name: appserver-worker
+          image: claudio3574/appserver-worker:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: WORKER_DELAY_MS
+              value: "10000"
+          envFrom:
+            - configMapRef:
+                name: appserver-config
+            - secretRef:
+                name: appserver-secret

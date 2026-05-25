@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: appserver-api
+  namespace: appserver
+spec:
+  selector:
+    app: appserver-api
+  ports:
+    - port: 8080
+      targetPort: 8080

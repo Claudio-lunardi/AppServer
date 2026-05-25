@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.37111.16
+# Visual Studio Version 18
+VisualStudioVersion = 18.7.11819.209 insiders
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppServer.Api", "AppServer.Api\AppServer.Api.csproj", "{E81439B3-DFE9-4F57-AAF6-3A2EC456FF16}"
 EndProject
@@ -14,6 +14,25 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppServer.Worker", "AppServer.Worker\AppServer.Worker.csproj", "{56077AEC-22FD-4C13-B387-2CADED88231E}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{CD051B6C-99A3-47A5-9180-E2D37679A1C5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{07AA01D0-B3C8-4FD7-9659-71123F7A56D4}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\docker-image.yml = .github\workflows\docker-image.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "k8s", "k8s", "{2FC81972-1CFF-4836-91F6-65ADA4DB4FB1}"
+	ProjectSection(SolutionItems) = preProject
+		k8s\api-deployment.yaml = k8s\api-deployment.yaml
+		k8s\api-service.yaml = k8s\api-service.yaml
+		k8s\configmap.yaml = k8s\configmap.yaml
+		k8s\namespace.yaml = k8s\namespace.yaml
+		k8s\rabbitmq-deployment.yaml = k8s\rabbitmq-deployment.yaml
+		k8s\rabbitmq-service.yaml = k8s\rabbitmq-service.yaml
+		k8s\secret.yaml = k8s\secret.yaml
+		k8s\worker-deployment.yaml = k8s\worker-deployment.yaml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,6 +67,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{07AA01D0-B3C8-4FD7-9659-71123F7A56D4} = {CD051B6C-99A3-47A5-9180-E2D37679A1C5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AB460E4E-BE14-4F1D-994F-11F57DE176EB}

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: appserver-config
+  namespace: appserver
+data:
+  ASPNETCORE_ENVIRONMENT: Production
+  ASPNETCORE_HTTP_PORTS: "8080"
+  DOTNET_ENVIRONMENT: Production
+  RabbitMq__HostName: rabbitmq
+  RabbitMq__Port: "5672"
+  Email__Host: smtp.gmail.com
+  Email__Port: "587"
+  Email__From: claudioappserve@gmail.com

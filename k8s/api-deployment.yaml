@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appserver-api
+  namespace: appserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: appserver-api
+  template:
+    metadata:
+      labels:
+        app: appserver-api
+    spec:
+      containers:
+        - name: appserver-api
+          image: claudio3574/appserver-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: appserver-config
+            - secretRef:
+                name: appserver-secret
