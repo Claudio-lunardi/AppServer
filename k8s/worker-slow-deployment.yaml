@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: appserver-worker
+  name: appserver-worker-slow
   namespace: appserver
 spec:
-  replicas: 5
+  replicas: 1
   selector:
     matchLabels:
-      app: appserver-worker
+      app: appserver-worker-slow
   template:
     metadata:
       labels:
-        app: appserver-worker
+        app: appserver-worker-slow
     spec:
       containers:
-        - name: appserver-worker
+        - name: appserver-worker-slow
           image: claudio3574/appserver-worker:b21e7bf1cebe87ab6addb6082b76fc9b29ad1a6f
           imagePullPolicy: IfNotPresent
           env:
             - name: WORKER_DELAY_MS
-              value: "0"
+              value: "10000"
           envFrom:
             - configMapRef:
                 name: appserver-config

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: appserver-api
-          image: claudio3574/appserver-api:latest
+          image: claudio3574/appserver-api:b21e7bf1cebe87ab6addb6082b76fc9b29ad1a6f
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

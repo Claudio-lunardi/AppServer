@@ -55,10 +55,6 @@ public class Worker : BackgroundService
 
     private static int ReadDelayMs()
     {
-        var rawValue = Environment.GetEnvironmentVariable("WORKER_DELAY_MS");
-
-        return int.TryParse(rawValue, out var delayMs) && delayMs > 0
-            ? delayMs
-            : 0;
+        return int.Parse(Environment.GetEnvironmentVariable("WORKER_DELAY_MS") ?? "0");
     }
 }
