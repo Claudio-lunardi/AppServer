@@ -4,7 +4,7 @@ metadata:
   name: appserver-worker
   namespace: appserver
 spec:
-  replicas: 5
+  replicas: 10
   selector:
     matchLabels:
       app: appserver-worker
@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
         - name: appserver-worker
-          image: claudio3574/appserver-worker:b21e7bf1cebe87ab6addb6082b76fc9b29ad1a6f
-          imagePullPolicy: IfNotPresent
+          image: claudio3574/appserver-worker:latest
+          imagePullPolicy: Always
           env:
             - name: WORKER_DELAY_MS
               value: "0"
